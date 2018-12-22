@@ -67,7 +67,9 @@ const resolvers = {
       return Object.keys(kernels).map(id => ({ id, status: "pretend" }));
     },
     messages: () => {
-      return ([] as Array<JupyterMessage>).concat(...Object.values(messages));
+      return ([] as Array<JupyterMessage>)
+        .concat(...Object.values(messages))
+        .map(message => ({ id: message.header.msg_id, payload: message }));
     }
   },
   Mutation: {
