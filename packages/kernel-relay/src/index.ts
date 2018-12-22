@@ -2,6 +2,8 @@ import { ApolloServer, gql } from "apollo-server";
 
 import { findAll, launchKernel, Kernel } from "@nteract/fs-kernels";
 
+import { JupyterMessage, kernelInfoRequest } from "@nteract/messaging";
+
 const Types = gql`
   type KernelSpec {
     id: ID!
@@ -33,6 +35,10 @@ type StartKernel = {
 
 const kernels: { [id: string]: Kernel } = {};
 
+const messages: {
+  [kernelId: string]: Array<JupyterMessage>;
+} = {};
+
 const typeDefs = [Types, Query, Mutation];
 const resolvers = {
   Query: {
@@ -40,7 +46,10 @@ const resolvers = {
       const kernelspecs = await findAll();
 
       return Object.keys(kernelspecs).map(key => {
-        return { id: key, ...kernelspecs[key] };
+        return {
+          id: key,
+          ...kernelspecs[key]
+        };
       });
     },
     running: () => {
@@ -51,9 +60,34 @@ const resolvers = {
     startKernel: async (_parentValue: any, args: StartKernel) => {
       const kernel = await launchKernel(args.name);
 
+      console.log("kernel launched", kernel);
+
+      // NOTE: we should generate IDs
+      // We're also setting a session ID within the enchannel-zmq setup, I wonder
+      // if we should use that
+      const id = kernel.connectionInfo.key;
+
+      messages[id] = [];
+
+      const subscription = kernel.channels.subscribe(
+        (message: JupyterMessage) => {
+          messages[id].push(message);
+          console.log(message);
+        }
+      );
+
+      // THOUGHT: Should we track our own messages sent out too?
+      //          Hmmmm
+      kernel.channels.next(kernelInfoRequest());
+
+      // NOTE: We are going to want to both:
+      //   subscription.unsubscribe()
+      //   AND
+      //   kernel.channels.complete()
+
       kernels[kernel.connectionInfo.key] = kernel;
       return {
-        id: kernel.connectionInfo.key,
+        id,
         status: "launched"
       };
     }
@@ -97,6 +131,7 @@ async function main() {
 
 process.on("exit", () => {
   Object.keys(kernels).map(async id => {
+    console.log("shutting down ", id);
     await kernels[id].shutdown();
   });
 });

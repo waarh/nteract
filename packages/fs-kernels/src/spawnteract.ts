@@ -37,7 +37,11 @@ import mkdirp from "mkdirp";
 import { findAll, KernelResourceByName, KernelSpec } from "./kernelspecs";
 import jp from "./jupyter-paths";
 
-import { JupyterConnectionInfo } from "enchannel-zmq-backend";
+import {
+  JupyterConnectionInfo,
+  createMainChannel
+} from "enchannel-zmq-backend";
+import { Channels } from "@nteract/messaging";
 
 export function cleanup(connectionFile: fs.PathLike) {
   try {
@@ -126,26 +130,20 @@ function writeConnectionFile(portFinderOptions?: {
 /**
  * Launch a kernel for a given kernelSpec
  * @public
- * @param  {object}       kernelSpec      describes a specific
- *                                        kernel, see the npm
- *                                        package `kernelspecs`
- * @param  {object}       [spawnOptions] `child_process`-like {@link https://github.com/sindresorhus/execa#options options for execa}
- *                                        use `{ cleanupConnectionFile: false }` to disable automatic connection file cleanup
- * @return {object}       spawnResults
- * @return {ChildProcess} spawnResults.spawn           spawned process
- * @return {string}       spawnResults.connectionFile  connection file path
- * @return {object}       spawnResults.config          connection info
- *
+ * @param  kernelSpec      describes a specific
+ *                         kernel, see the npm
+ *                         package `kernelspecs`
+ * @param  [spawnOptions] `child_process`-like {@link https://github.com/sindresorhus/execa#options options for execa}
+ *                         use `{ cleanupConnectionFile: false }` to disable automatic connection file cleanup
  */
-function launchSpec(kernelSpec: KernelSpec, spawnOptions?: Options) {
-  return writeConnectionFile().then(c => {
-    return launchSpecFromConnectionInfo(
-      kernelSpec,
-      c.config,
-      c.connectionFile,
-      spawnOptions
-    );
-  });
+async function launchSpec(kernelSpec: KernelSpec, spawnOptions?: Options) {
+  const info = await writeConnectionFile();
+  return launchSpecFromConnectionInfo(
+    kernelSpec,
+    info.config,
+    info.connectionFile,
+    spawnOptions
+  );
 }
 
 export type LaunchedKernel = {
@@ -153,6 +151,7 @@ export type LaunchedKernel = {
   connectionFile: string;
   config: JupyterConnectionInfo;
   kernelSpec: KernelSpec;
+  channels: Channels;
 };
 
 /**
@@ -171,12 +170,12 @@ export type LaunchedKernel = {
  * @return {object}       spawnResults.config          connection info
  *
  */
-function launchSpecFromConnectionInfo(
+async function launchSpecFromConnectionInfo(
   kernelSpec: KernelSpec,
   config: JupyterConnectionInfo,
   connectionFile: string,
   spawnOptions?: Options
-): LaunchedKernel {
+): Promise<LaunchedKernel> {
   const argv = kernelSpec.argv.map((x: string) =>
     x === "{connection_file}" ? connectionFile : x
   );
@@ -200,30 +199,30 @@ function launchSpecFromConnectionInfo(
     runningKernel.on("exit", (_code, _signal) => cleanup(connectionFile));
     runningKernel.on("error", _error => cleanup(connectionFile));
   }
+
+  const channels = await createMainChannel(config);
+
   return {
     spawn: runningKernel,
     connectionFile,
     config,
-    kernelSpec
+    kernelSpec,
+    channels
   };
 }
 
 /**
  * Launch a kernel by name
  * @public
- * @param  {string}       kernelName
- * @param  {object[]}     [specs]                      array of kernelSpec
+ * @param  kernelName
+ * @param  [specs]                      array of kernelSpec
  *                                                     objects to look through.
  *                                                     See the npm package
  *                                                     `kernelspecs`
- * @param  {object}       [spawnOptions]  `child_process`-like options for [execa]{@link https://github.com/sindresorhus/execa#options}
+ * @param  [spawnOptions]  `child_process`-like options for [execa]{@link https://github.com/sindresorhus/execa#options}
  *                                        use `{ cleanupConnectionFile: false }` to disable automatic connection file cleanup
- * @return {object}       spawnResults
- * @return {ChildProcess} spawnResults.spawn           spawned process
- * @return {string}       spawnResults.connectionFile  connection file path
- * @return {object}       spawnResults.config          connection info
  */
-function launch(
+async function launch(
   kernelName: string,
   spawnOptions?: Options,
   specs?: KernelResourceByName

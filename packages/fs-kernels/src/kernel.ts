@@ -4,6 +4,8 @@
 import { ExecaChildProcess } from "execa";
 import pidusage from "pidusage";
 
+import { Channels } from "@nteract/messaging";
+
 import { JupyterConnectionInfo } from "enchannel-zmq-backend";
 
 import { launch, launchSpec, LaunchedKernel, cleanup } from "./spawnteract";
@@ -14,12 +16,14 @@ export class Kernel {
   process: ExecaChildProcess;
   connectionInfo: JupyterConnectionInfo;
   connectionFile: string;
+  channels: Channels;
 
   constructor(launchedKernel: LaunchedKernel) {
     this.process = launchedKernel.spawn;
     this.connectionInfo = launchedKernel.config;
     this.kernelSpec = launchedKernel.kernelSpec;
     this.connectionFile = launchedKernel.connectionFile;
+    this.channels = launchedKernel.channels;
   }
 
   async shutdown() {

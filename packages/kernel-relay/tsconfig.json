@@ -5,5 +5,9 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "references": [{ "path": "../fs-kernels" }]
+  "references": [
+    { "path": "../fs-kernels" },
+    { "path": "../enchannel-zmq-backend" },
+    { "path": "../messaging" }
+  ]
 }
