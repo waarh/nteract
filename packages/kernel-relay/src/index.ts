@@ -4,7 +4,11 @@ import { findAll, launchKernel, Kernel } from "@nteract/fs-kernels";
 
 import { JupyterMessage, kernelInfoRequest } from "@nteract/messaging";
 
+import GraphQLJSON from "graphql-type-json";
+
 const Types = gql`
+  scalar JSON
+
   type KernelSpec {
     id: ID!
     name: String
@@ -14,12 +18,18 @@ const Types = gql`
     id: ID!
     status: String
   }
+
+  type Message {
+    id: ID!
+    payload: JSON
+  }
 `;
 
 const Query = gql`
   type Query {
     listKernelSpecs: [KernelSpec!]!
     running: [KernelSession!]!
+    messages: [Message!]!
   }
 `;
 
@@ -41,6 +51,7 @@ const messages: {
 
 const typeDefs = [Types, Query, Mutation];
 const resolvers = {
+  JSON: GraphQLJSON,
   Query: {
     listKernelSpecs: async () => {
       const kernelspecs = await findAll();
@@ -54,6 +65,9 @@ const resolvers = {
     },
     running: () => {
       return Object.keys(kernels).map(id => ({ id, status: "pretend" }));
+    },
+    messages: () => {
+      return ([] as Array<JupyterMessage>).concat(...Object.values(messages));
     }
   },
   Mutation: {
