@@ -4,7 +4,7 @@
 import { ExecaChildProcess } from "execa";
 import pidusage from "pidusage";
 
-import { Observable, of, merge, empty } from "rxjs";
+import { Observable, Observer, of, merge, empty } from "rxjs";
 import {
   filter,
   map,
@@ -57,9 +57,9 @@ export class Kernel {
       ofMessageType("shutdown_reply"),
       first(),
       // If we got a reply, great! :)
-      map(msg => {
+      map((msg: { content: { restart: boolean } }) => {
         return {
-          text: msg.content,
+          content: msg.content,
           id: this.id
         };
       }),
@@ -93,7 +93,7 @@ export class Kernel {
     );
 
     // On subscription, send the message
-    return Observable.create(observer => {
+    return Observable.create((observer: Observer<any>) => {
       const subscription = shutDownHandling.subscribe(observer);
       this.channels.next(request);
       return subscription;
