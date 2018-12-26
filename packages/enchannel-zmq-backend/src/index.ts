@@ -230,7 +230,7 @@ export const createMainChannelFromSockets = (
       Object.keys(sockets).forEach(name => {
         const socket = sockets[name];
         socket.removeAllListeners();
-        socket.close();
+        if (socket.close) socket.close();
       })
   );
 

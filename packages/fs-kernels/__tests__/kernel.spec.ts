@@ -7,28 +7,26 @@ describe("Kernel", () => {
     const kernel = await launchKernel("python3");
     expect(kernel.process).toBeDefined();
     expect(kernel.process.pid).toBeDefined();
-    console.log(kernel);
-    // await kernel.shutdown();
+    await kernel.shutdown();
     done();
   });
-  // it("can shutdown a kernel", async done => {
-  //   const kernel = await launchKernel("python3");
-  //   const originalKill = process.kill;
-  //   process.kill = jest.fn();
-  //   expect(kernel.process).toBeDefined();
-  //   await kernel.shutdown();
-  //   expect(process.kill).toBeCalledWith(kernel.process.pid);
-  //   expect(process.kill).toBeCalledTimes(1);
-  //   process.kill = originalKill;
-  //   await kernel.shutdown();
-  //   done();
-  // });
-  // it("can get usage metrics on a kernel", async done => {
-  //   const kernel = await launchKernel("python3");
-  //   const stats = await kernel.getUsage();
-  //   expect(stats.memory).toBeDefined();
-  //   expect(stats.pid).toEqual(kernel.process.pid);
-  //   await kernel.shutdown();
-  //   done();
-  // });
+  it("can shutdown a kernel", async done => {
+    const originalKill = process.kill;
+    process.kill = jest.fn(pid => {});
+    const kernel = await launchKernel("python3");
+    await kernel.shutdown();
+    expect(process.kill).toBeCalledWith(kernel.process.pid);
+    expect(process.kill).toBeCalledTimes(1);
+    process.kill = originalKill;
+    kernel.process.kill();
+    done();
+  });
+  it("can get usage metrics on a kernel", async done => {
+    const kernel = await launchKernel("python3");
+    const stats = await kernel.getUsage();
+    expect(stats.memory).toBeDefined();
+    expect(stats.pid).toEqual(kernel.process.pid);
+    await kernel.shutdown();
+    done();
+  });
 });
