@@ -4,9 +4,8 @@
 import { ExecaChildProcess } from "execa";
 import pidusage from "pidusage";
 
-import { Observable, Observer, of, merge, empty } from "rxjs";
+import { Observable, Observer, of, merge } from "rxjs";
 import {
-  filter,
   map,
   tap,
   mergeMap,
