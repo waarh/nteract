@@ -1,7 +1,6 @@
 import { toArray } from "rxjs/operators";
 
 import { launchKernel } from "../src/kernel";
-import { DebugLogger } from "builder-util";
 
 jest.unmock("process");
 
