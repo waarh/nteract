@@ -1,4 +1,7 @@
+import { toArray } from "rxjs/operators";
+
 import { launchKernel } from "../src/kernel";
+import { DebugLogger } from "builder-util";
 
 jest.unmock("process");
 
@@ -17,6 +20,23 @@ describe("Kernel", () => {
     await kernel.shutdown();
     expect(process.kill).toBeCalledWith(kernel.process.pid);
     expect(process.kill).toBeCalledTimes(1);
+    process.kill = originalKill;
+    kernel.process.kill();
+    done();
+  });
+  it("creates a valid shutdown epic", async done => {
+    const originalKill = process.kill;
+    process.kill = jest.fn(pid => {});
+    const kernel = await launchKernel("python3");
+    const shutdown$ = await kernel
+      .shutdownEpic()
+      .pipe(toArray())
+      .toPromise();
+    expect(shutdown$[0].subscribe).toBeTruthy();
+    expect(shutdown$[0].value).toEqual({
+      status: "shutdown",
+      id: kernel.id
+    });
     process.kill = originalKill;
     kernel.process.kill();
     done();
