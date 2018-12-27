@@ -62,11 +62,18 @@ export class Kernel {
        * shutdown_request, we will go forward with cleaning up the RxJS
        * subject and killing the kernel process.
        */
-      mergeMap(async () => {
+      mergeMap(async event => {
         // End all communication on the channels
         this.channels.complete();
         await this.shutdownProcess();
-        return of({ status: "shutdown" });
+
+        const finalResponse = { status: "shutdown" };
+        if (event.error) {
+          finalResponse.error = event.error;
+          finalResponse.status = "error";
+        }
+
+        return of(finalResponse);
       }),
       catchError(err =>
         // Catch all, in case there were other errors here
