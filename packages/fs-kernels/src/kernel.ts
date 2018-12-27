@@ -7,7 +7,6 @@ import pidusage from "pidusage";
 import { Observable, Observer, of, merge } from "rxjs";
 import {
   map,
-  tap,
   mergeMap,
   catchError,
   timeout,
@@ -45,7 +44,7 @@ export class Kernel {
     this.channels = launchedKernel.channels;
   }
 
-  shutdownEpic() {
+  shutdownEpic(timeoutMs: number = 2000) {
     const request = shutdownRequest({ restart: false });
 
     // Try to make a shutdown request
@@ -63,7 +62,7 @@ export class Kernel {
         };
       }),
       // If we don't get a response within 2s, assume failure :(
-      timeout(1000 * 2),
+      timeout(timeoutMs),
       catchError(err => of({ error: err, id: this.id })),
       mergeMap(async action => {
         // End all communication on the channels
@@ -107,8 +106,8 @@ export class Kernel {
     this.process.removeAllListeners();
   }
 
-  async shutdown() {
-    const observable = this.shutdownEpic();
+  async shutdown(timeoutMs: number = 2000) {
+    const observable = this.shutdownEpic(timeoutMs);
     return observable.pipe(toArray()).toPromise();
   }
 
