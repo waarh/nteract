@@ -64,6 +64,11 @@ export class Kernel {
       // If we don't get a response within 2s, assume failure :(
       timeout(timeoutMs),
       catchError(err => of({ error: err, id: this.id })),
+      /**
+       * Even if we don't receive a shutdown_reply from the kernel to our
+       * shutdown_request, we will go forward with cleaning up the RxJS
+       * subject and killing the kernel process.
+       */
       mergeMap(async action => {
         // End all communication on the channels
         this.channels.complete();
