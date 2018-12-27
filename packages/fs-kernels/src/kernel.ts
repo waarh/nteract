@@ -4,15 +4,8 @@
 import { ExecaChildProcess } from "execa";
 import pidusage from "pidusage";
 
-import { Observable, Observer, of, merge } from "rxjs";
-import {
-  map,
-  mergeMap,
-  catchError,
-  timeout,
-  first,
-  toArray
-} from "rxjs/operators";
+import { Observable, Observer, of } from "rxjs";
+import { map, mergeMap, catchError, timeout, first } from "rxjs/operators";
 
 import {
   Channels,
@@ -20,7 +13,6 @@ import {
   childOf,
   ofMessageType
 } from "@nteract/messaging";
-import { createKernelRef, KernelRef } from "@nteract/types";
 
 import { JupyterConnectionInfo } from "enchannel-zmq-backend";
 
