@@ -28,7 +28,6 @@ import { launch, launchSpec, LaunchedKernel, cleanup } from "./spawnteract";
 import { KernelSpec } from "./kernelspecs";
 
 export class Kernel {
-  id: KernelRef;
   kernelSpec: KernelSpec;
   process: ExecaChildProcess;
   connectionInfo: JupyterConnectionInfo;
@@ -36,7 +35,6 @@ export class Kernel {
   channels: Channels;
 
   constructor(launchedKernel: LaunchedKernel) {
-    this.id = createKernelRef();
     this.process = launchedKernel.spawn;
     this.connectionInfo = launchedKernel.config;
     this.kernelSpec = launchedKernel.kernelSpec;
@@ -59,15 +57,14 @@ export class Kernel {
       map((msg: { content: { restart: boolean } }) => {
         return {
           status: "shutting down",
-          content: msg.content,
-          id: this.id
+          content: msg.content
         };
       }),
       /**
        * If we don't get a response within timeoutMs, then throw an error.
        */
       timeout(timeoutMs),
-      catchError(err => of({ error: err, id: this.id })),
+      catchError(err => of({ error: err })),
       /**
        * Even if we don't receive a shutdown_reply from the kernel to our
        * shutdown_request, we will go forward with cleaning up the RxJS
@@ -77,11 +74,11 @@ export class Kernel {
         // End all communication on the channels
         this.channels.complete();
         await this.shutdownProcess();
-        return of({ status: "shutdown", id: this.id });
+        return of({ status: "shutdown" });
       }),
       catchError(err =>
         // Catch all, in case there were other errors here
-        of({ error: err, id: this.id, status: "error" })
+        of({ error: err, status: "error" })
       )
     );
 

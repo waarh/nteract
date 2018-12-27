@@ -30,8 +30,7 @@ describe("Kernel", () => {
     const shutdown$ = await kernel.shutdownEpic().toPromise();
     expect(shutdown$.subscribe).toBeTruthy();
     expect(shutdown$.value).toEqual({
-      status: "shutdown",
-      id: kernel.id
+      status: "shutdown"
     });
     process.kill = originalKill;
     kernel.process.kill();
