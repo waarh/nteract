@@ -27,12 +27,9 @@ describe("Kernel", () => {
     const originalKill = process.kill;
     process.kill = jest.fn(pid => {});
     const kernel = await launchKernel("python3");
-    const shutdown$ = await kernel
-      .shutdownEpic()
-      .pipe(toArray())
-      .toPromise();
-    expect(shutdown$[0].subscribe).toBeTruthy();
-    expect(shutdown$[0].value).toEqual({
+    const shutdown$ = await kernel.shutdownEpic().toPromise();
+    expect(shutdown$.subscribe).toBeTruthy();
+    expect(shutdown$.value).toEqual({
       status: "shutdown",
       id: kernel.id
     });

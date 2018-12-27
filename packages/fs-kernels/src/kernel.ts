@@ -103,7 +103,7 @@ export class Kernel {
 
   async shutdown(timeoutMs: number = 2000) {
     const observable = this.shutdownEpic(timeoutMs);
-    return observable.pipe(toArray()).toPromise();
+    return observable.toPromise();
   }
 
   async getUsage() {
