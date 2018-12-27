@@ -57,6 +57,7 @@ export class Kernel {
       // If we got a reply, great! :)
       map((msg: { content: { restart: boolean } }) => {
         return {
+          status: "shutting down",
           content: msg.content,
           id: this.id
         };
@@ -69,29 +70,15 @@ export class Kernel {
        * shutdown_request, we will go forward with cleaning up the RxJS
        * subject and killing the kernel process.
        */
-      mergeMap(async action => {
+      mergeMap(async () => {
         // End all communication on the channels
         this.channels.complete();
-
         await this.shutdownProcess();
-
-        return merge(
-          // Pass on our intermediate action (whether or not kernel ACK'd shutdown request promptly)
-          of(action),
-          // Indicate overall success (channels cleaned up)
-          of({
-            id: this.id
-          }),
-          // Inform about the state
-          of({
-            status: "shutting down",
-            id: this.id
-          })
-        );
+        return of({ status: "shutdown", id: this.id });
       }),
       catchError(err =>
         // Catch all, in case there were other errors here
-        of({ error: err, id: this.id })
+        of({ error: err, id: this.id, status: "error" })
       )
     );
 
