@@ -51,6 +51,7 @@ export class Kernel {
     // If we don't get a response within X time, force a shutdown
     // Either way do the same cleanup
     const shutDownHandling = this.channels.pipe(
+      /* Get the first response to our message request. */
       childOf(request),
       ofMessageType("shutdown_reply"),
       first(),
@@ -62,7 +63,9 @@ export class Kernel {
           id: this.id
         };
       }),
-      // If we don't get a response within 2s, assume failure :(
+      /**
+       * If we don't get a response within timeoutMs, then throw an error.
+       */
       timeout(timeoutMs),
       catchError(err => of({ error: err, id: this.id })),
       /**
