@@ -56,25 +56,36 @@ export class Kernel {
        * If we don't get a response within timeoutMs, then throw an error.
        */
       timeout(timeoutMs),
-      catchError(err => of({ error: err })),
+      catchError(err => of({ error: err, status: "error" })),
       /**
        * Even if we don't receive a shutdown_reply from the kernel to our
        * shutdown_request, we will go forward with cleaning up the RxJS
        * subject and killing the kernel process.
        */
-      mergeMap(async event => {
-        // End all communication on the channels
-        this.channels.complete();
-        await this.shutdownProcess();
+      mergeMap(
+        async (
+          event:
+            | { error: Error; status: string }
+            | { status: string; content: { restart: boolean } }
+        ) => {
+          // End all communication on the channels
+          this.channels.complete();
+          await this.shutdownProcess();
 
-        const finalResponse = { status: "shutdown" };
-        if (event.error) {
-          finalResponse.error = event.error;
-          finalResponse.status = "error";
+          const finalResponse: { error?: Error; status: string } = {
+            status: "shutdown"
+          };
+          if (event.status === "error") {
+            finalResponse.error = (event as {
+              error: Error;
+              status: string;
+            }).error;
+            finalResponse.status = "error";
+          }
+
+          return of(finalResponse);
         }
-
-        return of(finalResponse);
-      }),
+      ),
       catchError(err =>
         // Catch all, in case there were other errors here
         of({ error: err, status: "error" })
@@ -84,7 +95,6 @@ export class Kernel {
     // On subscription, send the message
     return Observable.create((observer: Observer<any>) => {
       const subscription = shutDownHandling.subscribe(observer);
-      this.channels.next(request);
       return subscription;
     });
   }

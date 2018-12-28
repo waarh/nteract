@@ -1,5 +1,3 @@
-import { toArray } from "rxjs/operators";
-
 import { launchKernel } from "../src/kernel";
 
 jest.unmock("process");
