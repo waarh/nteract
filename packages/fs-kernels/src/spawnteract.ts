@@ -26,9 +26,10 @@
  */
 import path from "path";
 import fs from "fs";
+import util from "util";
 
 import uuid from "uuid";
-import { getPorts } from "portfinder";
+import { getPorts as _getPorts } from "portfinder";
 import jsonfile from "jsonfile";
 
 import execa, { Options } from "execa";
@@ -86,7 +87,7 @@ function createConnectionInfo(
  * @return {object} configResults.config          connection info
  * @return {string} configResults.connectionFile  path to the connection file
  */
-function writeConnectionFile(portFinderOptions?: {
+async function writeConnectionFile(portFinderOptions?: {
   port: number;
   host: string;
 }): Promise<{ config: JupyterConnectionInfo; connectionFile: string }> {
@@ -94,37 +95,32 @@ function writeConnectionFile(portFinderOptions?: {
   options.port = options.port || 9000;
   options.host = options.host || "127.0.0.1";
 
-  return new Promise((resolve, reject) => {
-    getPorts(5, options, async (err: Error, ports: number[]) => {
-      if (err) {
-        reject(err);
-      } else {
-        // Make sure the kernel runtime dir exists before trying to write the
-        // kernel file.
-        const runtimeDir = await jp.runtimeDir();
-        mkdirp(runtimeDir, error => {
-          if (error) reject(error);
-        });
+  const writeFile = util.promisify(fs.writeFile);
+  const getPorts = util.promisify(_getPorts);
 
-        // Write the kernel connection file.
-        const config = createConnectionInfo(ports);
-        const connectionFile = path.join(
-          await jp.runtimeDir(),
-          `kernel-${uuid.v4()}.json`
-        );
-        jsonfile.writeFile(connectionFile, config, (jsonErr: Error) => {
-          if (jsonErr) {
-            reject(jsonErr);
-          } else {
-            resolve({
-              config,
-              connectionFile
-            });
-          }
-        });
-      }
+  try {
+    const ports = await getPorts(5, options);
+    const runtimeDir = await jp.runtimeDir();
+    mkdirp(runtimeDir, error => {
+      if (error) throw error;
     });
-  });
+
+    // Write the kernel connection file.
+    const config = createConnectionInfo(ports);
+    const connectionFile = path.join(
+      await jp.runtimeDir(),
+      `kernel-${uuid.v4()}.json`
+    );
+    debugger;
+    await writeFile(connectionFile, config);
+    return {
+      config,
+      connectionFile
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 /**
