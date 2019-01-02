@@ -35,10 +35,8 @@ jobs:
       - run: yarn run test --maxWorkers 1
 
       - run:
-          name: Report on types for Applications
-          shell: /bin/bash
+          name: Check Types For Applications
           command: |
-            set +e # Allow failure for now
             echo '**** Reporting on types for Jupyter Extension ****'
             yarn report:jext
             echo '**** Reporting on types for Desktop ****'
