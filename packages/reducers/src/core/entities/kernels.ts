@@ -6,7 +6,9 @@ import {
   makeKernelNotStartedRecord,
   makeLocalKernelRecord,
   makeRemoteKernelRecord,
-  makeKernelsRecord
+  makeKernelsRecord,
+  KernelsRecordProps,
+  KernelRecord
 } from "@nteract/types";
 import {
   makeKernelInfoRecord,
@@ -19,7 +21,10 @@ import { JSONObject } from "@nteract/commutable/src";
 // TODO: we need to clean up references to old kernels at some point. Listening
 // for KILL_KERNEL_SUCCESSFUL seems like a good candidate, but I think you can
 // also end up with a dead kernel if that fails and you hit KILL_KERNEL_FAILED.
-const byRef = (state = Immutable.Map(), action: Action) => {
+const byRef = (
+  state = Immutable.Map<string, KernelRecord>(),
+  action: Action
+) => {
   let typedAction;
   switch (action.type) {
     case actionTypes.SET_LANGUAGE_INFO:
@@ -127,4 +132,7 @@ const byRef = (state = Immutable.Map(), action: Action) => {
   }
 };
 
-export const kernels = combineReducers({ byRef }, makeKernelsRecord as any);
+export const kernels = combineReducers<Immutable.RecordOf<KernelsRecordProps>>(
+  { byRef },
+  makeKernelsRecord
+);

@@ -4,11 +4,19 @@ import * as Immutable from "immutable";
 
 import {
   makeContentCommunicationRecord,
-  makeContentsCommunicationRecord
+  makeContentsCommunicationRecord,
+  ContentsCommunicationRecordProps,
+  ContentCommunicationRecordProps
 } from "@nteract/types";
 import * as actions from "@nteract/actions";
 
-const byRef = (state = Immutable.Map(), action: Action) => {
+const byRef = (
+  state = Immutable.Map<
+    string,
+    Immutable.RecordOf<ContentCommunicationRecordProps>
+  >(),
+  action: Action
+) => {
   let typedAction;
   switch (action.type) {
     case actions.FETCH_CONTENT:
@@ -77,7 +85,6 @@ const byRef = (state = Immutable.Map(), action: Action) => {
   }
 };
 
-export const contents = combineReducers(
-  { byRef },
-  makeContentsCommunicationRecord as any
-);
+export const contents = combineReducers<
+  Immutable.RecordOf<ContentsCommunicationRecordProps>
+>({ byRef }, makeContentsCommunicationRecord);

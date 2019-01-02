@@ -4,12 +4,20 @@ import * as Immutable from "immutable";
 
 import {
   makeKernelCommunicationRecord,
-  makeKernelsCommunicationRecord
+  makeKernelsCommunicationRecord,
+  KernelsCommunicationRecordProps,
+  KernelCommunicationRecordProps
 } from "@nteract/types";
 import * as actions from "@nteract/actions";
 
 // TODO: we should spec out a way to watch the killKernel lifecycle.
-const byRef = (state = Immutable.Map(), action: Action) => {
+const byRef = (
+  state = Immutable.Map<
+    string,
+    Immutable.RecordOf<KernelCommunicationRecordProps>
+  >(),
+  action: Action
+) => {
   let typedAction;
   switch (action.type) {
     case actions.RESTART_KERNEL:
@@ -50,7 +58,6 @@ const byRef = (state = Immutable.Map(), action: Action) => {
   }
 };
 
-export const kernels = combineReducers(
-  { byRef },
-  makeKernelsCommunicationRecord as any
-);
+export const kernels = combineReducers<
+  Immutable.RecordOf<KernelsCommunicationRecordProps>
+>({ byRef }, makeKernelsCommunicationRecord);

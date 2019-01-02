@@ -14,7 +14,7 @@ import { kernels } from "./kernels";
 import { kernelspecs } from "./kernelspecs";
 import { modals } from "./modals";
 
-export const entities = combineReducers(
+export const entities = combineReducers<EntitiesRecordProps>(
   {
     contents,
     hosts,

@@ -4,11 +4,19 @@ import * as Immutable from "immutable";
 
 import {
   makeKernelspecsByRefCommunicationRecord,
-  makeKernelspecsCommunicationRecord
+  makeKernelspecsCommunicationRecord,
+  KernelspecsCommunicationRecordProps,
+  KernelspecsByRefCommunicationRecordProps
 } from "@nteract/types";
 import * as actionTypes from "@nteract/actions";
 
-export const byRef = (state = Immutable.Map(), action: Action) => {
+export const byRef = (
+  state = Immutable.Map<
+    string,
+    Immutable.RecordOf<KernelspecsByRefCommunicationRecordProps>
+  >(),
+  action: Action
+) => {
   let typedAction;
   switch (action.type) {
     case actionTypes.FETCH_KERNELSPECS:
@@ -37,7 +45,6 @@ export const byRef = (state = Immutable.Map(), action: Action) => {
   }
 };
 
-export const kernelspecs = combineReducers(
-  { byRef },
-  makeKernelspecsCommunicationRecord as any
-);
+export const kernelspecs = combineReducers<
+  Immutable.RecordOf<KernelspecsCommunicationRecordProps>
+>({ byRef }, makeKernelspecsCommunicationRecord as any);

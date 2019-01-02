@@ -6,11 +6,18 @@ import {
   makeKernelspec,
   makeKernelspecsByRefRecord,
   makeKernelspecsRecord,
-  KernelspecProps
+  KernelspecsByRefRecordProps,
+  KernelspecsRecordProps
 } from "@nteract/types";
 import * as actionTypes from "@nteract/actions";
 
-const byRef = (state = Immutable.Map(), action: Action) => {
+const byRef = (
+  state = Immutable.Map<
+    string,
+    Immutable.RecordOf<KernelspecsByRefRecordProps>
+  >(),
+  action: Action
+) => {
   let typedAction = action as actionTypes.FetchKernelspecsFulfilled;
   switch (action.type) {
     case actionTypes.FETCH_KERNELSPECS_FULFILLED:
@@ -45,7 +52,6 @@ const refs = (state = Immutable.List(), action: Action) => {
   }
 };
 
-export const kernelspecs = combineReducers(
-  { byRef, refs },
-  makeKernelspecsRecord as any
-);
+export const kernelspecs = combineReducers<
+  Immutable.RecordOf<KernelspecsRecordProps>
+>({ byRef, refs }, makeKernelspecsRecord);

@@ -7,10 +7,12 @@ import * as actions from "@nteract/actions";
 import {
   makeHostsRecord,
   makeJupyterHostRecord,
-  makeLocalHostRecord
+  makeLocalHostRecord,
+  HostsRecordProps,
+  HostRecord
 } from "@nteract/types";
 
-const byRef = (state = Immutable.Map(), action: Action) => {
+const byRef = (state = Immutable.Map<string, HostRecord>(), action: Action) => {
   let typedAction;
   switch (action.type) {
     case actions.ADD_HOST:
@@ -49,4 +51,7 @@ const refs = (state = Immutable.List(), action: Action) => {
   }
 };
 
-export const hosts = combineReducers({ byRef, refs }, makeHostsRecord as any);
+export const hosts = combineReducers<Immutable.RecordOf<HostsRecordProps>>(
+  { byRef, refs },
+  makeHostsRecord as any
+);

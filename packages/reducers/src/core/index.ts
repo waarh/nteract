@@ -3,7 +3,7 @@ import { Action } from "redux";
 
 import * as actions from "@nteract/actions";
 
-import { makeStateRecord } from "@nteract/types";
+import { makeStateRecord, StateRecordProps } from "@nteract/types";
 
 import { communication } from "./communication";
 import { entities } from "./entities";
@@ -13,7 +13,7 @@ import { entities } from "./entities";
 // a document, which knows about its session and that session knows about its
 // kernel. For now, we need to keep a reference to the currently targeted kernel
 // around.
-const kernelRef = (state = "", action: Action) => {
+const kernelRef = (state: string | null | undefined = "", action: Action) => {
   let typedAction;
   switch (action.type) {
     case actions.LAUNCH_KERNEL:
@@ -32,7 +32,10 @@ const kernelRef = (state = "", action: Action) => {
   }
 };
 
-const currentKernelspecsRef = (state = "", action: Action) => {
+const currentKernelspecsRef = (
+  state: string | undefined | null = "",
+  action: Action
+) => {
   switch (action.type) {
     case actions.FETCH_KERNELSPECS:
       const typedAction = action as actions.FetchKernelspecs;
@@ -42,7 +45,7 @@ const currentKernelspecsRef = (state = "", action: Action) => {
   }
 };
 
-const core = combineReducers(
+const core = combineReducers<StateRecordProps>(
   {
     communication,
     currentKernelspecsRef,
