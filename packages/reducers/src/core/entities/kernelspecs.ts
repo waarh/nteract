@@ -53,5 +53,7 @@ const refs = (state = Immutable.List(), action: Action) => {
 };
 
 export const kernelspecs = combineReducers<
-  Immutable.RecordOf<KernelspecsRecordProps>
->({ byRef, refs }, makeKernelspecsRecord);
+  KernelspecsRecordProps,
+  Action,
+  string
+>({ byRef, refs }, makeKernelspecsRecord as any);

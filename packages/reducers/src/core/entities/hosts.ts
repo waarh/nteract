@@ -51,7 +51,7 @@ const refs = (state = Immutable.List(), action: Action) => {
   }
 };
 
-export const hosts = combineReducers<Immutable.RecordOf<HostsRecordProps>>(
+export const hosts = combineReducers<HostsRecordProps, Action, string>(
   { byRef, refs },
   makeHostsRecord as any
 );

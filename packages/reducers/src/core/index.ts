@@ -1,5 +1,6 @@
 import { combineReducers } from "redux-immutable";
 import { Action } from "redux";
+import * as Immutable from "immutable";
 
 import * as actions from "@nteract/actions";
 
@@ -45,7 +46,7 @@ const currentKernelspecsRef = (
   }
 };
 
-const core = combineReducers<StateRecordProps>(
+const core = combineReducers<StateRecordProps, Action, string>(
   {
     communication,
     currentKernelspecsRef,

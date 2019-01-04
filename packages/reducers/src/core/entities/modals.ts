@@ -1,5 +1,5 @@
 import { combineReducers } from "redux-immutable";
-import * as Immutable from "immutable";
+import { Action } from "redux";
 
 import * as actions from "@nteract/actions";
 import { makeModalsRecord, ModalsRecordProps } from "@nteract/types";
@@ -18,7 +18,7 @@ const modalType = (
   }
 };
 
-export const modals = combineReducers<Immutable.RecordOf<ModalsRecordProps>>(
+export const modals = combineReducers<ModalsRecordProps, Action, string>(
   { modalType },
-  makeModalsRecord
+  makeModalsRecord as any
 );

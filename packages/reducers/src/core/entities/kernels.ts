@@ -132,7 +132,7 @@ const byRef = (
   }
 };
 
-export const kernels = combineReducers<Immutable.RecordOf<KernelsRecordProps>>(
+export const kernels = combineReducers<KernelsRecordProps, Action, string>(
   { byRef },
-  makeKernelsRecord
+  makeKernelsRecord as any
 );

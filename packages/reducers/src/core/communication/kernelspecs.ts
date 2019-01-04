@@ -46,5 +46,7 @@ export const byRef = (
 };
 
 export const kernelspecs = combineReducers<
-  Immutable.RecordOf<KernelspecsCommunicationRecordProps>
+  KernelspecsCommunicationRecordProps,
+  Action,
+  string
 >({ byRef }, makeKernelspecsCommunicationRecord as any);

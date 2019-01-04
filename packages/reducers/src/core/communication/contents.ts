@@ -86,5 +86,7 @@ const byRef = (
 };
 
 export const contents = combineReducers<
-  Immutable.RecordOf<ContentsCommunicationRecordProps>
->({ byRef }, makeContentsCommunicationRecord);
+  ContentsCommunicationRecordProps,
+  Action,
+  string
+>({ byRef }, makeContentsCommunicationRecord as any);

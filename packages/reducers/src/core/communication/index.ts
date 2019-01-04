@@ -1,4 +1,5 @@
 import { combineReducers } from "redux-immutable";
+import { Action } from "redux";
 
 import {
   makeCommunicationRecord,
@@ -9,7 +10,11 @@ import { contents } from "./contents";
 import { kernels } from "./kernels";
 import { kernelspecs } from "./kernelspecs";
 
-export const communication = combineReducers<CommunicationRecordProps>(
+export const communication = combineReducers<
+  CommunicationRecordProps,
+  Action,
+  string
+>(
   {
     contents,
     kernels,
