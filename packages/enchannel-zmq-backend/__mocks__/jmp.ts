@@ -3,6 +3,8 @@
  */
 import { EventEmitter } from "events";
 
+import Message from "jmp";
+
 class Socket extends EventEmitter {
   constructor(public type: any, public scheme: any, public key: any) {
     super();
@@ -21,14 +23,5 @@ class Socket extends EventEmitter {
   }
   close() {}
 }
-
-const Message = (msg: any) => ({
-  header: { ...msg.header },
-  parent_header: { ...msg.parent_header },
-  content: { ...msg.content },
-  metadata: { ...msg.metadata },
-  buffers: [],
-  idents: []
-});
 
 export { Message, Socket };

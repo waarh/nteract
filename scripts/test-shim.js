@@ -3,6 +3,10 @@ global.Image = global.window.Image;
 
 global.Range = function Range() {};
 
+global.Blob = function(content, options) {
+  return { content, options };
+};
+
 const createContextualFragment = html => {
   const div = document.createElement("div");
   div.innerHTML = html;
